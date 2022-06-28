@@ -6,6 +6,7 @@ public class Main {
         public static void main(String[] args) {
             Playing_Table table = new Playing_Table();
             table.preFlop();
+            table.Flop();
         }
 
 }
