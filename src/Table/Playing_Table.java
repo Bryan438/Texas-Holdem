@@ -96,16 +96,27 @@ public class Playing_Table {
                     }
                     continue;
                 }
+
                 if (pList.get(playerCount).getSmallBlind() == true && firstTime == true) {
                     int rest = currentCallAmount - pList.get(playerCount).getBetMoney();
                     pList.get(playerCount).setBetMoney(rest);
                     pList.get(playerCount).minusPersonalBudget(rest);
                     totalPot += rest;
                     firstTime = false;
-                } else {
-                    pList.get(playerCount).setBetMoney(currentCallAmount);
-                    pList.get(playerCount).minusPersonalBudget(currentCallAmount);
-                    totalPot += currentCallAmount;
+                }
+                else if(pList.get(playerCount).getBigBlind() == true)
+                {
+                    int rest = currentCallAmount - pList.get(playerCount).getBetMoney();
+                    pList.get(playerCount).setBetMoney(rest);
+                    pList.get(playerCount).minusPersonalBudget(rest);
+                    totalPot += rest;
+                }
+                else
+                {
+                    int rest = currentCallAmount - pList.get(playerCount).getBetMoney();
+                    pList.get(playerCount).setBetMoney(rest);
+                    pList.get(playerCount).minusPersonalBudget(rest);
+                    totalPot += rest;
                 }
 
                 if (pList.get(playerCount).getReturnMark() == true && raisePos == -1) {
@@ -126,8 +137,13 @@ public class Playing_Table {
             }
             else if(result == 2)
             {
-                System.out.println("New amount? (Must larger than previous bet)");
+                System.out.println("New amount?");
                 int newAmount = console.nextInt();
+                if(newAmount <= currentCallAmount)
+                {
+                    System.out.println("Must larger than previous bet");
+                    continue;
+                }
                 if(newAmount > pList.get(playerCount).getPersonalBudget())
                 {
                     System.out.println("Invalid amount, Exceed your maximum budget, Enter it again");
@@ -165,6 +181,7 @@ public class Playing_Table {
                 {
                     playerCount = 0;
                 }
+                System.out.println("Total pot is now: " + totalPot);
             }
             else if(result == 3){
                 pList.get(playerCount).minusPersonalBudget(pList.get(playerCount).getBetMoney());
@@ -237,6 +254,7 @@ public class Playing_Table {
                         secondRoundStatus = true;
                     }
                 }
+                System.out.println("Total pot is now: " + totalPot);
             }
             else if(result == 2)
             {
@@ -258,6 +276,7 @@ public class Playing_Table {
                 {
                     playerCount = 0;
                 }
+                System.out.println("Total pot is now: " + totalPot);
             }
             else if(result == 3)
             {
@@ -280,13 +299,13 @@ public class Playing_Table {
     {
         int dealerPos = -1;
         int secRaisePos = -1;
+        secondRoundStatus = false;
         for(int i = 0; i < pList.size(); i++)
         {
             pList.get(i).setRoundBet(0);
         }
-        System.out.println("Public pool:");
         countOfCard++;
-        System.out.println("Card for turn round: " + deck.getDeckOfCard().get(countOfCard));
+        System.out.println("Card for turn round: " + deck.getDeckOfCard().get(countOfCard).getCount() + " " + deck.getDeckOfCard().get(countOfCard).getSuit());
         System.out.println("New around starts, Players");
         for(int i = 0; i < pList.size(); i++)
         {
@@ -332,6 +351,7 @@ public class Playing_Table {
                         secondRoundStatus = true;
                     }
                 }
+                System.out.println("Total pot is now: " + totalPot);
             }
             else if(result == 2)
             {
@@ -353,6 +373,7 @@ public class Playing_Table {
                 {
                     playerCount = 0;
                 }
+                System.out.println("Total pot is now: " + totalPot);
             }
             else if(result == 3)
             {
@@ -375,13 +396,13 @@ public class Playing_Table {
     {
         int dealerPos = -1;
         int secRaisePos = -1;
+        secondRoundStatus = false;
         for(int i = 0; i < pList.size(); i++)
         {
             pList.get(i).setRoundBet(0);
         }
-        System.out.println("Public pool:");
         countOfCard++;
-        System.out.println("Card for turn round: " + deck.getDeckOfCard().get(countOfCard));
+        System.out.println("Card for turn round: " + deck.getDeckOfCard().get(countOfCard).getCount() + " " + deck.getDeckOfCard().get(countOfCard).getSuit());
         System.out.println("New around starts, Players");
         for(int i = 0; i < pList.size(); i++)
         {
@@ -427,6 +448,7 @@ public class Playing_Table {
                         secondRoundStatus = true;
                     }
                 }
+                System.out.println("Total pot is now: " + totalPot);
             }
             else if(result == 2)
             {
@@ -448,6 +470,7 @@ public class Playing_Table {
                 {
                     playerCount = 0;
                 }
+                System.out.println("Total pot is now: " + totalPot);
             }
             else if(result == 3)
             {
@@ -463,8 +486,13 @@ public class Playing_Table {
             }
 
         }
-
     }
+
+    public void checkTotalPot()
+    {
+        System.out.println("Total pot is now: " + totalPot);
+    }
+
     public void checkPlayerStatus(Player p)
     {
         System.out.println("Below are player's information");
