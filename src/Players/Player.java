@@ -9,12 +9,18 @@ public class Player {
     private boolean smallBlind = false;
     private int personalBudget;
     private int betMoney;
+    private int firstRoundBet = 0;
+    private int secondRoundBet = 0;
+    private int thirdRoundBet = 0;
+    private int fourthRoundBet = 0;
     private boolean returnMark = false;
     private boolean raiseMark = false;
     private int playerNumber;
     private boolean dealer = false;
+    private int sidePot = 0;
     private int roundBet;
-    private int allInBet;
+    private boolean allInMark = false;
+    private boolean winMark = false;
 
     public Player(int personalBudget, Card firstCard, Card secondCard, int betMoney, int playerNumber)
     {
@@ -32,6 +38,7 @@ public class Player {
     {
         return secondCard;
     }
+
     public void setBigBlind()
     {
         bigBlind = true;
@@ -56,6 +63,7 @@ public class Player {
     {
         smallBlind = false;
     }
+
     public void setBetMoney(int money)
     {
         betMoney += money;
@@ -64,6 +72,40 @@ public class Player {
     {
         return betMoney;
     }
+
+    public void setFirstRoundBet(int money)
+    {
+        firstRoundBet += money;
+    }
+    public void setSecondRoundBet(int money)
+    {
+        secondRoundBet += money;
+    }
+    public void setThirdRoundBet(int money)
+    {
+        thirdRoundBet += money;
+    }
+    public void setFourthRoundBet(int money)
+    {
+        fourthRoundBet += money;
+    }
+    public int getFirstRoundBet()
+    {
+        return firstRoundBet;
+    }
+    public int getSecondRoundBet()
+    {
+        return secondRoundBet;
+    }
+    public int getThirdRoundBet()
+    {
+        return thirdRoundBet;
+    }
+    public int getFourthRoundBet()
+    {
+        return fourthRoundBet;
+    }
+
     public void addPersonalBudget(int budget)
     {
         personalBudget += budget;
@@ -76,6 +118,7 @@ public class Player {
     {
         return personalBudget;
     }
+
     public void setReturnMark ()
     {
         returnMark = true;
@@ -101,6 +144,7 @@ public class Player {
     {
         return raiseMark;
     }
+
     public int getPlayerNumber()
     {
         return playerNumber;
@@ -113,6 +157,7 @@ public class Player {
     {
         dealer = true;
     }
+
     public int getRoundBet()
     {
         return roundBet;
@@ -121,12 +166,19 @@ public class Player {
     {
         roundBet = rb;
     }
-    public int getAllInBet()
+    public void setAllInMark()
     {
-        return allInBet;
+        allInMark = true;
     }
-    public void setAllInBet(int ab)
+
+    public void setWinMark()
     {
-        allInBet = ab;
+        winMark = true;
     }
+    public boolean getWinMark()
+    {
+        return winMark;
+    }
+
+
 }

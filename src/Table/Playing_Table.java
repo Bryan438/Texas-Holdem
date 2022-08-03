@@ -8,6 +8,8 @@ import Players.Player;
 public class Playing_Table {
     private boolean gameEndStatus = false;
     private boolean secondRoundStatus = false;
+    private boolean thirdRoundStatus = false;
+    private boolean fourthRoundStatus = false;
     private int totalPot = 0;
     private int playerCount = 0;
     private int countOfCard = 0;
@@ -21,8 +23,6 @@ public class Playing_Table {
     {
         Scanner console = new Scanner(System.in);
         Playerlist playerlist = new Playerlist();
-
-
 
         int initPos = -1;
         int raisePos = -1;
@@ -56,12 +56,12 @@ public class Playing_Table {
         }
 
         pList.get(playerCount).setSmallBlind();
-        pList.get(playerCount).setBetMoney(currentCallAmount/2);
+        pList.get(playerCount).setFirstRoundBet(currentCallAmount/2);
         pList.get(playerCount).minusPersonalBudget(currentCallAmount/2);
         playerCount++;
         pList.get(playerCount).setReturnMark();
         pList.get(playerCount).setBigBlind();
-        pList.get(playerCount).setBetMoney(currentCallAmount);
+        pList.get(playerCount).setFirstRoundBet(currentCallAmount);
         pList.get(playerCount).minusPersonalBudget(currentCallAmount);
         playerCount++;
         if(numOfPlayers == 2)
@@ -78,15 +78,12 @@ public class Playing_Table {
         while(gameEndStatus == false)
         {
             System.out.println("Player " + pList.get(playerCount).getPlayerNumber() + ", It's your turn, 1 for Call; 2 for Raise; 3 for Fold; 4 to check current status.");
-            if(pList.get(playerCount).getBigBlind() == true)
-            {
-                System.out.println("You cannot fold as if you are big blind");
-            }
             int result = console.nextInt();
             if(result == 1) {
                 System.out.println("Total pot is now: " + totalPot);
-                if(pList.get(playerCount).getPersonalBudget() < currentCallAmount)
+                if(pList.get(playerCount).getPersonalBudget() <= currentCallAmount)
                 {
+                    pList.get(playerCount).setAllInMark();
                     totalPot += pList.get(playerCount).getPersonalBudget();
                     pList.get(playerCount).minusPersonalBudget(pList.get(playerCount).getPersonalBudget());
                     pList.remove(playerCount);
@@ -97,27 +94,11 @@ public class Playing_Table {
                     continue;
                 }
 
-                if (pList.get(playerCount).getSmallBlind() == true && firstTime == true) {
-                    int rest = currentCallAmount - pList.get(playerCount).getBetMoney();
-                    pList.get(playerCount).setBetMoney(rest);
-                    pList.get(playerCount).minusPersonalBudget(rest);
-                    totalPot += rest;
-                    firstTime = false;
-                }
-                else if(pList.get(playerCount).getBigBlind() == true)
-                {
-                    int rest = currentCallAmount - pList.get(playerCount).getBetMoney();
-                    pList.get(playerCount).setBetMoney(rest);
-                    pList.get(playerCount).minusPersonalBudget(rest);
-                    totalPot += rest;
-                }
-                else
-                {
-                    int rest = currentCallAmount - pList.get(playerCount).getBetMoney();
-                    pList.get(playerCount).setBetMoney(rest);
-                    pList.get(playerCount).minusPersonalBudget(rest);
-                    totalPot += rest;
-                }
+                int rest = currentCallAmount - pList.get(playerCount).getFirstRoundBet();
+                pList.get(playerCount).setFirstRoundBet(rest);
+                pList.get(playerCount).minusPersonalBudget(rest);
+                totalPot += rest;
+
 
                 if (pList.get(playerCount).getReturnMark() == true && raisePos == -1) {
                         gameEndStatus = true;
@@ -149,7 +130,7 @@ public class Playing_Table {
                     System.out.println("Invalid amount, Exceed your maximum budget, Enter it again");
                     continue;
                 }
-                if(newAmount == pList.get(playerCount).getPersonalBudget())
+                /*if(newAmount == pList.get(playerCount).getPersonalBudget())
                 {
                     int rest = newAmount - pList.get(playerCount).getBetMoney();
                     rest += newAmount;
@@ -161,19 +142,16 @@ public class Playing_Table {
                         playerCount = 0;
                     }
                     continue;
-                }
+                }*/
                 int rest = newAmount - pList.get(playerCount).getBetMoney();
 
-                pList.get(playerCount).setBetMoney(rest);
+                pList.get(playerCount).setFirstRoundBet(rest);
                 pList.get(playerCount).minusPersonalBudget(rest);
 
                 totalPot += rest;
                 System.out.println("Total pot is now: " + totalPot);
                 currentCallAmount = newAmount;
-                if(raisePos != -1)
-                {
-                    pList.get(raisePos).setOffRaiseMark();
-                }
+
                 pList.get(playerCount).setRaiseMark();
                 raisePos = playerCount;
                 playerCount++;
@@ -184,7 +162,7 @@ public class Playing_Table {
                 System.out.println("Total pot is now: " + totalPot);
             }
             else if(result == 3){
-                pList.get(playerCount).minusPersonalBudget(pList.get(playerCount).getBetMoney());
+                pList.get(playerCount).minusPersonalBudget(pList.get(playerCount).getFirstRoundBet());
                 pList.remove(playerCount);
                 numOfPlayers--;
                 if(playerCount == numOfPlayers) {
@@ -203,13 +181,14 @@ public class Playing_Table {
     {
         int dealerPos = -1;
         int secRaisePos = -1;
+        int raiseAmount = 0;
 
         System.out.println("Public pool:");
         for(int i = countOfCard + 1; i < countOfCard + 4; i++)
         {
             System.out.println(deck.getDeckOfCard().get(i).getCount() + " " + deck.getDeckOfCard().get(i).getSuit());
-
         }
+        countOfCard += 3;
         System.out.println("New around starts, Players");
         for(int i = 0; i < pList.size(); i++)
         {
@@ -232,12 +211,23 @@ public class Playing_Table {
             int result = console.nextInt();
             if(result == 1)
             {
+
+                if(secRaisePos != -1)
+                {
+                    int gap = raiseAmount - pList.get(playerCount).getSecondRoundBet();
+                    pList.get(playerCount).setSecondRoundBet(gap);
+                    pList.get(playerCount).minusPersonalBudget(gap);
+                    totalPot += gap;
+                    if(playerCount == secRaisePos - 1)
+                    {
+                        secondRoundStatus = true;
+                    }
+                }
                 playerCount++;
                 if(playerCount == pList.size())
                 {
                     playerCount = 0;
                 }
-
                 if(secRaisePos == -1)
                 {
                     if(playerCount == secreturnPos)
@@ -246,30 +236,21 @@ public class Playing_Table {
                         continue;
                     }
                 }
-
-                if(secRaisePos != -1)
-                {
-                    if(playerCount == secRaisePos)
-                    {
-                        secondRoundStatus = true;
-                    }
-                }
                 System.out.println("Total pot is now: " + totalPot);
             }
             else if(result == 2)
             {
                 System.out.println("New Amount?");
-                int raiseAmount = console.nextInt();
+                raiseAmount = console.nextInt();
                 if(raiseAmount > pList.get(playerCount).getPersonalBudget())
                 {
                     System.out.println("Invalid amount, Exceed your maximum budget, Enter it again");
                     continue;
                 }
-                int gap = raiseAmount - pList.get(playerCount).getRoundBet();
-                pList.get(playerCount).setRoundBet(raiseAmount);
-                totalPot += gap;
+                int gap = raiseAmount - pList.get(playerCount).getSecondRoundBet();
+                pList.get(playerCount).setSecondRoundBet(gap);
                 pList.get(playerCount).minusPersonalBudget(gap);
-                pList.get(playerCount).setBetMoney(gap);
+                totalPot += gap;
                 secRaisePos = playerCount;
                 playerCount++;
                 if(playerCount == pList.size())
@@ -280,7 +261,7 @@ public class Playing_Table {
             }
             else if(result == 3)
             {
-                pList.get(playerCount).minusPersonalBudget(pList.get(playerCount).getBetMoney());
+                pList.get(playerCount).minusPersonalBudget(pList.get(playerCount).getSecondRoundBet());
                 pList.remove(playerCount);
                 if(playerCount == pList.size()) {
                     playerCount = 0;
@@ -298,13 +279,14 @@ public class Playing_Table {
     public void Turn()
     {
         int dealerPos = -1;
-        int secRaisePos = -1;
-        secondRoundStatus = false;
+        int thirdRaisePos = -1;
+        int raiseAmount = 0;
+        thirdRoundStatus = false;
         for(int i = 0; i < pList.size(); i++)
         {
             pList.get(i).setRoundBet(0);
         }
-        countOfCard++;
+        countOfCard = countOfCard + 1;
         System.out.println("Card for turn round: " + deck.getDeckOfCard().get(countOfCard).getCount() + " " + deck.getDeckOfCard().get(countOfCard).getSuit());
         System.out.println("New around starts, Players");
         for(int i = 0; i < pList.size(); i++)
@@ -314,41 +296,42 @@ public class Playing_Table {
                 dealerPos = i;
             }
         }
-        int secreturnPos = dealerPos + 1;
+        int thirdReturnPos = dealerPos + 1;
 
-        if(secreturnPos == pList.size())
+        if(thirdReturnPos == pList.size())
         {
-            secreturnPos = 0;
+            thirdReturnPos = 0;
         }
-        playerCount = secreturnPos;
+        playerCount = thirdReturnPos;
 
-        while(secondRoundStatus == false)
+        while(thirdRoundStatus == false)
         {
             System.out.println("Player " + pList.get(playerCount).getPlayerNumber() + ", It's your turn, 1 for Checked; 2 for Raise; 3 for Fold; 4 to check current status.");
             int result = console.nextInt();
             if(result == 1)
             {
+                if(thirdRaisePos != -1)
+                {
+                    int gap = raiseAmount - pList.get(playerCount).getThirdRoundBet();
+                    pList.get(playerCount).setThirdRoundBet(gap);
+                    pList.get(playerCount).minusPersonalBudget(gap);
+                    totalPot += gap;
+                    if(playerCount == thirdRaisePos - 1)
+                    {
+                        thirdRoundStatus = true;
+                    }
+                }
                 playerCount++;
-
                 if(playerCount == pList.size())
                 {
                     playerCount = 0;
                 }
-
-                if(secRaisePos == -1)
+                if(thirdRaisePos == -1)
                 {
-                    if(playerCount == secreturnPos)
+                    if(playerCount == thirdReturnPos)
                     {
-                        secondRoundStatus = true;
+                        thirdRoundStatus = true;
                         continue;
-                    }
-                }
-
-                if(secRaisePos != -1)
-                {
-                    if(playerCount == secRaisePos)
-                    {
-                        secondRoundStatus = true;
                     }
                 }
                 System.out.println("Total pot is now: " + totalPot);
@@ -356,18 +339,17 @@ public class Playing_Table {
             else if(result == 2)
             {
                 System.out.println("New Amount?");
-                int raiseAmount = console.nextInt();
+                raiseAmount = console.nextInt();
                 if(raiseAmount > pList.get(playerCount).getPersonalBudget())
                 {
                     System.out.println("Invalid amount, Exceed your maximum budget, Enter it again");
                     continue;
                 }
-                int gap = raiseAmount - pList.get(playerCount).getRoundBet();
-                pList.get(playerCount).setRoundBet(raiseAmount);
-                totalPot += gap;
+                int gap = raiseAmount - pList.get(playerCount).getThirdRoundBet();
+                pList.get(playerCount).setThirdRoundBet(gap);
                 pList.get(playerCount).minusPersonalBudget(gap);
-                pList.get(playerCount).setBetMoney(gap);
-                secRaisePos = playerCount;
+                totalPot += gap;
+                thirdRaisePos = playerCount;
                 playerCount++;
                 if(playerCount == pList.size())
                 {
@@ -377,7 +359,7 @@ public class Playing_Table {
             }
             else if(result == 3)
             {
-                pList.get(playerCount).minusPersonalBudget(pList.get(playerCount).getBetMoney());
+                pList.get(playerCount).minusPersonalBudget(pList.get(playerCount).getThirdRoundBet());
                 pList.remove(playerCount);
                 if(playerCount == pList.size()) {
                     playerCount = 0;
@@ -395,13 +377,13 @@ public class Playing_Table {
     public void River()
     {
         int dealerPos = -1;
-        int secRaisePos = -1;
-        secondRoundStatus = false;
+        int fourthRaisePos = -1;
+        int raiseAmount = 0;
         for(int i = 0; i < pList.size(); i++)
         {
             pList.get(i).setRoundBet(0);
         }
-        countOfCard++;
+        countOfCard = countOfCard + 1;
         System.out.println("Card for turn round: " + deck.getDeckOfCard().get(countOfCard).getCount() + " " + deck.getDeckOfCard().get(countOfCard).getSuit());
         System.out.println("New around starts, Players");
         for(int i = 0; i < pList.size(); i++)
@@ -411,41 +393,42 @@ public class Playing_Table {
                 dealerPos = i;
             }
         }
-        int secreturnPos = dealerPos + 1;
+        int fourthReturnPos = dealerPos + 1;
 
-        if(secreturnPos == pList.size())
+        if(fourthReturnPos == pList.size())
         {
-            secreturnPos = 0;
+            fourthReturnPos = 0;
         }
-        playerCount = secreturnPos;
+        playerCount = fourthReturnPos;
 
-        while(secondRoundStatus == false)
+        while(fourthRoundStatus == false)
         {
             System.out.println("Player " + pList.get(playerCount).getPlayerNumber() + ", It's your turn, 1 for Checked; 2 for Raise; 3 for Fold; 4 to check current status.");
             int result = console.nextInt();
             if(result == 1)
             {
+                if(fourthRaisePos != -1)
+                {
+                    int gap = raiseAmount - pList.get(playerCount).getThirdRoundBet();
+                    pList.get(playerCount).setThirdRoundBet(gap);
+                    pList.get(playerCount).minusPersonalBudget(gap);
+                    totalPot += gap;
+                    if(playerCount == fourthRaisePos - 1)
+                    {
+                        fourthRoundStatus = true;
+                    }
+                }
                 playerCount++;
-
                 if(playerCount == pList.size())
                 {
                     playerCount = 0;
                 }
-
-                if(secRaisePos == -1)
+                if(fourthRaisePos == -1)
                 {
-                    if(playerCount == secreturnPos)
+                    if(playerCount == fourthReturnPos)
                     {
-                        secondRoundStatus = true;
+                        fourthRoundStatus = true;
                         continue;
-                    }
-                }
-
-                if(secRaisePos != -1)
-                {
-                    if(playerCount == secRaisePos)
-                    {
-                        secondRoundStatus = true;
                     }
                 }
                 System.out.println("Total pot is now: " + totalPot);
@@ -453,18 +436,17 @@ public class Playing_Table {
             else if(result == 2)
             {
                 System.out.println("New Amount?");
-                int raiseAmount = console.nextInt();
+                raiseAmount = console.nextInt();
                 if(raiseAmount > pList.get(playerCount).getPersonalBudget())
                 {
                     System.out.println("Invalid amount, Exceed your maximum budget, Enter it again");
                     continue;
                 }
-                int gap = raiseAmount - pList.get(playerCount).getRoundBet();
-                pList.get(playerCount).setRoundBet(raiseAmount);
-                totalPot += gap;
+                int gap = raiseAmount - pList.get(playerCount).getThirdRoundBet();
+                pList.get(playerCount).setThirdRoundBet(gap);
                 pList.get(playerCount).minusPersonalBudget(gap);
-                pList.get(playerCount).setBetMoney(gap);
-                secRaisePos = playerCount;
+                totalPot += gap;
+                fourthRaisePos = playerCount;
                 playerCount++;
                 if(playerCount == pList.size())
                 {
@@ -474,7 +456,7 @@ public class Playing_Table {
             }
             else if(result == 3)
             {
-                pList.get(playerCount).minusPersonalBudget(pList.get(playerCount).getBetMoney());
+                pList.get(playerCount).minusPersonalBudget(pList.get(playerCount).getThirdRoundBet());
                 pList.remove(playerCount);
                 if(playerCount == pList.size()) {
                     playerCount = 0;
@@ -493,13 +475,18 @@ public class Playing_Table {
         System.out.println("Total pot is now: " + totalPot);
     }
 
+    public void calculateResult()
+    {
+
+    }
+
+
     public void checkPlayerStatus(Player p)
     {
         System.out.println("Below are player's information");
         System.out.println("Card for player are " + p.getFirstCard().getCount() + " " + p.getFirstCard().getSuit() + " " + p.getSecondCard().getCount() + " " + p.getSecondCard().getSuit());
-        System.out.println("Bet money for the round: " + p.getBetMoney());
+
         System.out.println("Left budget: " + p.getPersonalBudget());
-        System.out.println("Round bet: " + p.getRoundBet());
 
     }
 
